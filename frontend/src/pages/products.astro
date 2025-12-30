@@ -1,0 +1,303 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Productos">
+    <div class="products-page">
+        <div class="page-header flex items-center justify-between mb-4">
+            <h1 class="page-title">Productos</h1>
+            <button id="new-product-btn" class="btn btn-primary"
+                >+ Nuevo Producto</button
+            >
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <input
+                    type="text"
+                    id="search-input"
+                    class="form-input"
+                    placeholder="Buscar productos..."
+                    style="max-width: 300px;"
+                />
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>SKU</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-tbody">
+                        <tr>
+                            <td colspan="7" class="text-center">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Nuevo Producto</h3>
+                <button class="btn-close-modal">&times;</button>
+            </div>
+            <form id="product-form">
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" id="name" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SKU</label>
+                    <input type="text" id="sku" class="form-input" />
+                </div>
+                <div class="grid grid-cols-2">
+                    <div class="form-group">
+                        <label class="form-label">Precio *</label>
+                        <input
+                            type="number"
+                            id="price"
+                            class="form-input"
+                            step="0.01"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock Inicial</label>
+                        <input
+                            type="number"
+                            id="stock"
+                            class="form-input"
+                            value="0"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary"
+                        >Guardar</button
+                    >
+                    <button type="button" class="btn btn-secondary modal-close"
+                        >Cancelar</button
+                    >
+                </div>
+            </form>
+        </div>
+    </div>
+</AppLayout>
+
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-light);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .btn-close-modal:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    const currentBusiness = JSON.parse(
+        localStorage.getItem("currentBusiness") || "{}"
+    );
+
+    if (!currentBusiness.id) {
+        window.location.href = "/businesses";
+    }
+
+    let products: any[] = [];
+    let editingProduct: any = null;
+
+    async function loadProducts(search = "") {
+        try {
+            products = await api.getProducts(currentBusiness.id, search);
+            renderProducts();
+        } catch (error) {
+            console.error("Error loading products:", error);
+        }
+    }
+
+    function renderProducts() {
+        const tbody = document.getElementById("products-tbody");
+        if (!tbody) return;
+
+        if (products.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="7" class="text-center">No hay productos</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = products
+            .map(
+                (product) => `
+      <tr>
+        <td>${product.name}</td>
+        <td>${product.sku || "-"}</td>
+        <td>${product.category_name || "-"}</td>
+        <td>$${product.price.toFixed(2)}</td>
+        <td>${product.stock}</td>
+        <td>
+          <span class="badge ${product.is_active ? "badge-success" : "badge-danger"}">
+            ${product.is_active ? "Activo" : "Inactivo"}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-outline" data-action="edit" data-id="${product.id}">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `
+            )
+            .join("");
+
+        tbody.querySelectorAll('[data-action="edit"]').forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const id = btn.getAttribute("data-id");
+                const product = products.find((p) => p.id === id);
+                if (product) editProduct(product);
+            });
+        });
+    }
+
+    function showModal(product: any = null) {
+        const modal = document.getElementById("product-modal");
+        const title = document.getElementById("modal-title");
+        const form = document.getElementById("product-form") as HTMLFormElement;
+
+        if (product) {
+            title!.textContent = "Editar Producto";
+            (document.getElementById("name") as HTMLInputElement).value =
+                product.name;
+            (document.getElementById("sku") as HTMLInputElement).value =
+                product.sku || "";
+            (document.getElementById("price") as HTMLInputElement).value =
+                product.price;
+            (document.getElementById("stock") as HTMLInputElement).value =
+                product.stock;
+            editingProduct = product;
+        } else {
+            title!.textContent = "Nuevo Producto";
+            form.reset();
+            editingProduct = null;
+        }
+
+        modal!.style.display = "flex";
+    }
+
+    function hideModal() {
+        document.getElementById("product-modal")!.style.display = "none";
+        editingProduct = null;
+    }
+
+    function editProduct(product: any) {
+        showModal(product);
+    }
+
+    document
+        .getElementById("new-product-btn")
+        ?.addEventListener("click", () => showModal());
+
+    document
+        .querySelector(".btn-close-modal")
+        ?.addEventListener("click", hideModal);
+    document
+        .querySelector("button.modal-close")
+        ?.addEventListener("click", hideModal);
+
+    document.getElementById("search-input")?.addEventListener("input", (e) => {
+        const search = (e.target as HTMLInputElement).value;
+        loadProducts(search);
+    });
+
+    document
+        .getElementById("product-form")
+        ?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                business_id: currentBusiness.id,
+                name: (document.getElementById("name") as HTMLInputElement)
+                    .value,
+                sku:
+                    (document.getElementById("sku") as HTMLInputElement)
+                        .value || null,
+                price: parseFloat(
+                    (document.getElementById("price") as HTMLInputElement).value
+                ),
+                stock: parseInt(
+                    (document.getElementById("stock") as HTMLInputElement).value
+                ),
+            };
+
+            try {
+                if (editingProduct) {
+                    await api.updateProduct(editingProduct.id, data);
+                } else {
+                    await api.createProduct(data);
+                }
+
+                hideModal();
+                loadProducts();
+            } catch (error: any) {
+                alert("Error: " + error.message);
+            }
+        });
+
+    loadProducts();
+</script>

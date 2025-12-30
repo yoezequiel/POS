@@ -1,0 +1,231 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<BaseLayout title={title}>
+    <div class="app-layout">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-brand">
+                    <a href="/dashboard">🏪 POS System</a>
+                </div>
+                <div class="navbar-menu">
+                    <a href="/dashboard" class="navbar-link">Dashboard</a>
+                    <a href="/pos" class="navbar-link">Punto de Venta</a>
+                    <a href="/products" class="navbar-link">Productos</a>
+                    <a href="/customers" class="navbar-link">Clientes</a>
+                    <a href="/reports" class="navbar-link">Reportes</a>
+                    <button id="logout-btn" class="btn btn-outline btn-sm"
+                        >Cerrar Sesión</button
+                    >
+                </div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <div class="container">
+                <slot />
+            </div>
+        </main>
+    </div>
+</BaseLayout>
+
+<style>
+    .app-layout {
+        min-height: 100vh;
+        background: linear-gradient(to bottom right, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-light);
+        box-shadow: var(--shadow-md);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .navbar-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72px;
+    }
+
+    .navbar-brand a {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(
+            135deg,
+            var(--primary-color) 0%,
+            var(--primary-dark) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-decoration: none;
+        letter-spacing: -0.02em;
+        transition: var(--transition-slow);
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .navbar-brand a:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+
+    .navbar-brand a:active {
+        transform: scale(0.95);
+    }
+
+    .navbar-menu {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .navbar-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radius);
+        transition: var(--transition-slow);
+        position: relative;
+        cursor: pointer;
+    }
+
+    .navbar-link::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--primary-color);
+        opacity: 0;
+        border-radius: var(--radius);
+        transition: var(--transition);
+    }
+
+    .navbar-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 1rem;
+        right: 1rem;
+        height: 3px;
+        background: var(--primary-color);
+        transform: scaleX(0);
+        transition: var(--transition-slow);
+        border-radius: 2px;
+    }
+
+    .navbar-link:hover {
+        color: var(--primary-color);
+        background-color: rgba(99, 102, 241, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .navbar-link:hover::before {
+        opacity: 0.05;
+    }
+
+    .navbar-link:hover::after {
+        transform: scaleX(1);
+    }
+
+    .navbar-link:active {
+        transform: translateY(0);
+    }
+
+    .navbar-link.active {
+        color: var(--primary-color);
+        background-color: rgba(99, 102, 241, 0.1);
+        font-weight: 700;
+    }
+
+    .navbar-link.active::after {
+        transform: scaleX(1);
+    }
+
+    .main-content {
+        padding: 2.5rem 0;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .navbar-container {
+            padding: 0 1rem;
+            height: 64px;
+        }
+
+        .navbar-menu {
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .navbar-link {
+            font-size: 0.8125rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .navbar-brand a {
+            font-size: 1.25rem;
+        }
+
+        .main-content {
+            padding: 1.5rem 0;
+        }
+    }
+</style>
+
+<script>
+    // Mark active nav link
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll(".navbar-link");
+
+    navLinks.forEach((link) => {
+        const href = link.getAttribute("href");
+        if (
+            href === currentPath ||
+            (href !== "/dashboard" && currentPath.startsWith(href))
+        ) {
+            link.classList.add("active");
+        }
+    });
+
+    // Logout with visual feedback
+    const logoutBtn = document.getElementById("logout-btn");
+    logoutBtn?.addEventListener("click", (e) => {
+        const button = e.target as HTMLButtonElement;
+        button.classList.add("btn-loading");
+        button.textContent = "Cerrando...";
+
+        setTimeout(() => {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+        }, 500);
+    });
+</script>

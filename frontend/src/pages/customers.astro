@@ -1,0 +1,267 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Clientes">
+    <div class="customers-page">
+        <div class="page-header flex items-center justify-between mb-4">
+            <h1 class="page-title">Clientes</h1>
+            <button id="new-customer-btn" class="btn btn-primary"
+                >+ Nuevo Cliente</button
+            >
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <input
+                    type="text"
+                    id="search-input"
+                    class="form-input"
+                    placeholder="Buscar clientes..."
+                    style="max-width: 300px;"
+                />
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-tbody">
+                        <tr>
+                            <td colspan="5" class="text-center">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="customer-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Nuevo Cliente</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="customer-form">
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" id="name" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Documento</label>
+                    <input type="text" id="document" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="email" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Teléfono</label>
+                    <input type="tel" id="phone" class="form-input" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary"
+                        >Guardar</button
+                    >
+                    <button type="button" class="btn btn-outline modal-close"
+                        >Cancelar</button
+                    >
+                </div>
+            </form>
+        </div>
+    </div>
+</AppLayout>
+
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-light);
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    const currentBusiness = JSON.parse(
+        localStorage.getItem("currentBusiness") || "{}"
+    );
+
+    if (!currentBusiness.id) {
+        window.location.href = "/businesses";
+    }
+
+    let customers: any[] = [];
+    let editingCustomer: any = null;
+
+    async function loadCustomers(search = "") {
+        try {
+            customers = await api.getCustomers(currentBusiness.id, search);
+            renderCustomers();
+        } catch (error) {
+            console.error("Error loading customers:", error);
+        }
+    }
+
+    function renderCustomers() {
+        const tbody = document.getElementById("customers-tbody");
+        if (!tbody) return;
+
+        if (customers.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="5" class="text-center">No hay clientes</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = customers
+            .map(
+                (customer) => `
+      <tr>
+        <td>${customer.name}</td>
+        <td>${customer.document || "-"}</td>
+        <td>${customer.email || "-"}</td>
+        <td>${customer.phone || "-"}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" data-action="edit" data-id="${customer.id}">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `
+            )
+            .join("");
+
+        tbody.querySelectorAll('[data-action="edit"]').forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const id = btn.getAttribute("data-id");
+                const customer = customers.find((c) => c.id === id);
+                if (customer) editCustomer(customer);
+            });
+        });
+    }
+
+    function showModal(customer: any = null) {
+        const modal = document.getElementById("customer-modal");
+        const title = document.getElementById("modal-title");
+        const form = document.getElementById(
+            "customer-form"
+        ) as HTMLFormElement;
+
+        if (customer) {
+            title!.textContent = "Editar Cliente";
+            (document.getElementById("name") as HTMLInputElement).value =
+                customer.name;
+            (document.getElementById("document") as HTMLInputElement).value =
+                customer.document || "";
+            (document.getElementById("email") as HTMLInputElement).value =
+                customer.email || "";
+            (document.getElementById("phone") as HTMLInputElement).value =
+                customer.phone || "";
+            editingCustomer = customer;
+        } else {
+            title!.textContent = "Nuevo Cliente";
+            form.reset();
+            editingCustomer = null;
+        }
+
+        modal!.style.display = "flex";
+    }
+
+    function hideModal() {
+        document.getElementById("customer-modal")!.style.display = "none";
+        editingCustomer = null;
+    }
+
+    function editCustomer(customer: any) {
+        showModal(customer);
+    }
+
+    document
+        .getElementById("new-customer-btn")
+        ?.addEventListener("click", () => showModal());
+
+    document.querySelectorAll(".modal-close").forEach((btn) => {
+        btn.addEventListener("click", hideModal);
+    });
+
+    document.getElementById("search-input")?.addEventListener("input", (e) => {
+        const search = (e.target as HTMLInputElement).value;
+        loadCustomers(search);
+    });
+
+    document
+        .getElementById("customer-form")
+        ?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                business_id: currentBusiness.id,
+                name: (document.getElementById("name") as HTMLInputElement)
+                    .value,
+                document:
+                    (document.getElementById("document") as HTMLInputElement)
+                        .value || null,
+                email:
+                    (document.getElementById("email") as HTMLInputElement)
+                        .value || null,
+                phone:
+                    (document.getElementById("phone") as HTMLInputElement)
+                        .value || null,
+            };
+
+            try {
+                if (editingCustomer) {
+                    await api.updateCustomer(editingCustomer.id, data);
+                } else {
+                    await api.createCustomer(data);
+                }
+
+                hideModal();
+                loadCustomers();
+            } catch (error: any) {
+                alert("Error: " + error.message);
+            }
+        });
+
+    loadCustomers();
+</script>

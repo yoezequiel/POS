@@ -1,0 +1,237 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Seleccionar Negocio">
+    <div class="businesses-page">
+        <div class="container" style="max-width: 800px; margin-top: 3rem;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Mis Negocios</h2>
+                    <button id="new-business-btn" class="btn btn-primary btn-sm"
+                        >+ Nuevo Negocio</button
+                    >
+                </div>
+
+                <div id="businesses-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="business-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Negocio</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="business-form">
+                <div class="form-group">
+                    <label class="form-label">Nombre del Negocio *</label>
+                    <input type="text" id="name" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" id="address" class="form-input" />
+                </div>
+                <div class="grid grid-cols-2">
+                    <div class="form-group">
+                        <label class="form-label">Moneda</label>
+                        <select id="currency" class="form-select">
+                            <option value="USD">USD</option>
+                            <option value="ARS">ARS</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tasa de Impuesto (%)</label>
+                        <input
+                            type="number"
+                            id="tax_rate"
+                            class="form-input"
+                            value="0"
+                            step="0.01"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Crear</button>
+                    <button type="button" class="btn btn-outline modal-close"
+                        >Cancelar</button
+                    >
+                </div>
+            </form>
+        </div>
+    </div>
+</BaseLayout>
+
+<style>
+    .businesses-page {
+        min-height: 100vh;
+        background: var(--bg-color);
+    }
+
+    .business-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .business-item:hover {
+        background: var(--bg-color);
+    }
+
+    .business-item:last-child {
+        border-bottom: none;
+    }
+
+    .business-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .business-details {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-light);
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    let businesses: any[] = [];
+
+    async function loadBusinesses() {
+        try {
+            businesses = await api.getBusinesses();
+            renderBusinesses();
+        } catch (error) {
+            console.error("Error loading businesses:", error);
+        }
+    }
+
+    function renderBusinesses() {
+        const list = document.getElementById("businesses-list");
+        if (!list) return;
+
+        if (businesses.length === 0) {
+            list.innerHTML =
+                '<p class="loading">No tienes negocios. Crea uno para comenzar.</p>';
+            return;
+        }
+
+        list.innerHTML = businesses
+            .map(
+                (business) => `
+      <div class="business-item" data-id="${business.id}">
+        <div class="business-name">${business.name}</div>
+        <div class="business-details">
+          ${business.address || ""} • ${business.currency} • Rol: ${business.role}
+        </div>
+      </div>
+    `
+            )
+            .join("");
+
+        list.querySelectorAll(".business-item").forEach((item) => {
+            item.addEventListener("click", () => {
+                const id = item.getAttribute("data-id");
+                const business = businesses.find((b) => b.id === id);
+                if (business) {
+                    localStorage.setItem(
+                        "currentBusiness",
+                        JSON.stringify(business)
+                    );
+                    window.location.href = "/dashboard";
+                }
+            });
+        });
+    }
+
+    function showModal() {
+        document.getElementById("business-modal")!.style.display = "flex";
+    }
+
+    function hideModal() {
+        document.getElementById("business-modal")!.style.display = "none";
+        (document.getElementById("business-form") as HTMLFormElement).reset();
+    }
+
+    document
+        .getElementById("new-business-btn")
+        ?.addEventListener("click", showModal);
+
+    document.querySelectorAll(".modal-close").forEach((btn) => {
+        btn.addEventListener("click", hideModal);
+    });
+
+    document
+        .getElementById("business-form")
+        ?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: (document.getElementById("name") as HTMLInputElement)
+                    .value,
+                address:
+                    (document.getElementById("address") as HTMLInputElement)
+                        .value || null,
+                currency: (
+                    document.getElementById("currency") as HTMLSelectElement
+                ).value,
+                tax_rate:
+                    parseFloat(
+                        (
+                            document.getElementById(
+                                "tax_rate"
+                            ) as HTMLInputElement
+                        ).value
+                    ) / 100,
+            };
+
+            try {
+                await api.createBusiness(data);
+                hideModal();
+                loadBusinesses();
+            } catch (error: any) {
+                alert("Error: " + error.message);
+            }
+        });
+
+    loadBusinesses();
+</script>

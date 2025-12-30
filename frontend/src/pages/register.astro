@@ -1,0 +1,125 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+---
+
+<AuthLayout title="Registrarse">
+    <div class="auth-form-container">
+        <h2 class="form-title">Crear Cuenta</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label class="form-label" for="full_name">Nombre completo</label
+                >
+                <input
+                    type="text"
+                    id="full_name"
+                    class="form-input"
+                    required
+                    placeholder="Juan Pérez"
+                />
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">Correo electrónico</label>
+                <input
+                    type="email"
+                    id="email"
+                    class="form-input"
+                    required
+                    placeholder="tu@email.com"
+                />
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Contraseña</label>
+                <input
+                    type="password"
+                    id="password"
+                    class="form-input"
+                    required
+                    placeholder="••••••••"
+                    minlength="6"
+                />
+            </div>
+            <div id="error-message" class="form-error" style="display: none;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Registrarse
+            </button>
+        </form>
+        <p class="auth-footer">
+            ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+        </p>
+    </div>
+</AuthLayout>
+
+<style>
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-color);
+    }
+
+    .auth-footer {
+        margin-top: 1.5rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .auth-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    const form = document.getElementById("register-form") as HTMLFormElement;
+    const errorMessage = document.getElementById(
+        "error-message"
+    ) as HTMLDivElement;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const full_name = (
+            document.getElementById("full_name") as HTMLInputElement
+        ).value;
+        const email = (document.getElementById("email") as HTMLInputElement)
+            .value;
+        const password = (
+            document.getElementById("password") as HTMLInputElement
+        ).value;
+
+        try {
+            errorMessage.style.display = "none";
+            const button = form.querySelector(
+                'button[type="submit"]'
+            ) as HTMLButtonElement;
+            button.disabled = true;
+            button.textContent = "Registrando...";
+
+            const response = await api.register(full_name, email, password);
+
+            localStorage.setItem("accessToken", response.accessToken);
+            localStorage.setItem("refreshToken", response.refreshToken);
+            localStorage.setItem("user", JSON.stringify(response.user));
+
+            window.location.href = "/dashboard";
+        } catch (error: any) {
+            errorMessage.textContent = error.message || "Error al registrarse";
+            errorMessage.style.display = "block";
+            const button = form.querySelector(
+                'button[type="submit"]'
+            ) as HTMLButtonElement;
+            button.disabled = false;
+            button.textContent = "Registrarse";
+        }
+    });
+</script>

@@ -1,0 +1,233 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Reportes">
+    <div class="reports-page">
+        <h1 class="page-title">Reportes</h1>
+
+        <div class="grid grid-cols-2 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Ventas por Método de Pago</h3>
+                </div>
+                <div id="payment-methods-chart"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Productos Más Vendidos</h3>
+                </div>
+                <div id="top-products-list"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Historial de Ventas</h3>
+                <div class="flex gap-2">
+                    <input type="date" id="start-date" class="form-input" />
+                    <input type="date" id="end-date" class="form-input" />
+                    <button id="filter-btn" class="btn btn-primary"
+                        >Filtrar</button
+                    >
+                </div>
+            </div>
+            <div id="sales-history"></div>
+        </div>
+    </div>
+</AppLayout>
+
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+    }
+
+    .product-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .product-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-item-name {
+        font-weight: 500;
+    }
+
+    .product-item-qty {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .payment-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .payment-stat:last-child {
+        border-bottom: none;
+    }
+
+    .payment-method {
+        font-weight: 500;
+    }
+
+    .payment-amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    const currentBusiness = JSON.parse(
+        localStorage.getItem("currentBusiness") || "{}"
+    );
+
+    if (!currentBusiness.id) {
+        window.location.href = "/businesses";
+    }
+
+    async function loadReports() {
+        try {
+            // Top products
+            const topProducts = await api.getTopProducts(currentBusiness.id);
+            const topProductsList =
+                document.getElementById("top-products-list");
+
+            if (topProductsList) {
+                if (topProducts.length === 0) {
+                    topProductsList.innerHTML =
+                        '<p class="loading">No hay datos</p>';
+                } else {
+                    topProductsList.innerHTML = topProducts
+                        .map(
+                            (product: any) => `
+            <div class="product-item">
+              <div>
+                <div class="product-item-name">${product.name}</div>
+                <div style="font-size: 0.875rem; color: var(--text-light);">
+                  ${product.sales_count} ventas - $${product.total_revenue.toFixed(2)}
+                </div>
+              </div>
+              <div class="product-item-qty">${product.total_quantity} uds</div>
+            </div>
+          `
+                        )
+                        .join("");
+                }
+            }
+
+            // Payment methods (mock chart)
+            const paymentMethods: any = {
+                EFECTIVO: 0,
+                DEBITO: 0,
+                CREDITO: 0,
+                TRANSFERENCIA: 0,
+            };
+
+            const sales = await api.getSales(currentBusiness.id, 100);
+            sales.forEach((sale: any) => {
+                if (paymentMethods[sale.payment_method] !== undefined) {
+                    paymentMethods[sale.payment_method] += sale.total;
+                }
+            });
+
+            const paymentChart = document.getElementById(
+                "payment-methods-chart"
+            );
+            if (paymentChart) {
+                paymentChart.innerHTML = Object.entries(paymentMethods)
+                    .map(
+                        ([method, amount]: [string, any]) => `
+            <div class="payment-stat">
+              <span class="payment-method">${method}</span>
+              <span class="payment-amount">$${amount.toFixed(2)}</span>
+            </div>
+          `
+                    )
+                    .join("");
+            }
+
+            loadSalesHistory();
+        } catch (error) {
+            console.error("Error loading reports:", error);
+        }
+    }
+
+    async function loadSalesHistory(startDate?: string, endDate?: string) {
+        try {
+            const sales = await api.getSales(currentBusiness.id, 50);
+            const salesHistory = document.getElementById("sales-history");
+
+            if (!salesHistory) return;
+
+            if (sales.length === 0) {
+                salesHistory.innerHTML = '<p class="loading">No hay ventas</p>';
+                return;
+            }
+
+            salesHistory.innerHTML = `
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Método</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sales
+                  .map(
+                      (sale: any) => `
+                <tr>
+                  <td>${new Date(sale.created_at).toLocaleString()}</td>
+                  <td>${sale.user_name}</td>
+                  <td>${sale.customer_name || "-"}</td>
+                  <td>$${sale.total.toFixed(2)}</td>
+                  <td><span class="badge badge-info">${sale.payment_method}</span></td>
+                  <td>
+                    <span class="badge ${sale.status === "COMPLETED" ? "badge-success" : "badge-danger"}">
+                      ${sale.status}
+                    </span>
+                  </td>
+                </tr>
+              `
+                  )
+                  .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+        } catch (error) {
+            console.error("Error loading sales history:", error);
+        }
+    }
+
+    document.getElementById("filter-btn")?.addEventListener("click", () => {
+        const startDate = (
+            document.getElementById("start-date") as HTMLInputElement
+        ).value;
+        const endDate = (
+            document.getElementById("end-date") as HTMLInputElement
+        ).value;
+        loadSalesHistory(startDate, endDate);
+    });
+
+    loadReports();
+</script>

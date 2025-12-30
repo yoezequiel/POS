@@ -1,0 +1,226 @@
+---
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout title="Dashboard">
+    <div class="dashboard">
+        <h1 class="page-title">Dashboard</h1>
+
+        <div id="stats-grid" class="grid grid-cols-4 mb-4">
+            <!-- Stats will be loaded here -->
+        </div>
+
+        <div class="grid grid-cols-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Ventas Recientes</h3>
+                </div>
+                <div id="recent-sales"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Productos con Bajo Stock</h3>
+                </div>
+                <div id="low-stock"></div>
+            </div>
+        </div>
+    </div>
+</AppLayout>
+
+<style>
+    .page-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        margin-bottom: 2.5rem;
+        color: var(--text-color);
+        letter-spacing: -0.02em;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        border: 2px solid var(--border-light);
+        transition: var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(
+            to bottom,
+            var(--primary-color),
+            var(--primary-dark)
+        );
+        opacity: 0;
+        transition: var(--transition-slow);
+    }
+
+    .stat-card:hover {
+        box-shadow:
+            var(--shadow-xl),
+            0 0 30px rgba(99, 102, 241, 0.15);
+        transform: translateY(-6px) scale(1.02);
+        border-color: var(--primary-light);
+    }
+
+    .stat-card:hover::before {
+        opacity: 1;
+        width: 5px;
+    }
+
+    .stat-card:active {
+        transform: translateY(-2px) scale(1);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-color);
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+        font-size: 0.9375rem;
+    }
+</style>
+
+<script>
+    import { api } from "../lib/api";
+
+    const currentBusiness = JSON.parse(
+        localStorage.getItem("currentBusiness") || "{}"
+    );
+
+    if (!currentBusiness.id) {
+        window.location.href = "/businesses";
+    }
+
+    async function loadDashboard() {
+        try {
+            const stats = await api.getDashboardStats(currentBusiness.id);
+
+            const statsGrid = document.getElementById("stats-grid");
+            if (statsGrid) {
+                statsGrid.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-label">Ventas Hoy</div>
+            <div class="stat-value">${stats.today.sales_count}</div>
+            <div class="stat-label">$${stats.today.total.toFixed(2)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ventas del Mes</div>
+            <div class="stat-value">${stats.month.sales_count}</div>
+            <div class="stat-label">$${stats.month.total.toFixed(2)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Productos Activos</div>
+            <div class="stat-value">${stats.active_products_count}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Stock Bajo</div>
+            <div class="stat-value">${stats.low_stock_count}</div>
+          </div>
+        `;
+            }
+
+            // Load recent sales
+            const sales = await api.getSales(currentBusiness.id, 5);
+            const recentSalesDiv = document.getElementById("recent-sales");
+            if (recentSalesDiv) {
+                if (sales.length === 0) {
+                    recentSalesDiv.innerHTML =
+                        '<p class="loading">No hay ventas recientes</p>';
+                } else {
+                    recentSalesDiv.innerHTML = `
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Método</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${sales
+                      .map(
+                          (sale: any) => `
+                    <tr>
+                      <td>${new Date(sale.created_at).toLocaleDateString()}</td>
+                      <td>$${sale.total.toFixed(2)}</td>
+                      <td><span class="badge badge-info">${sale.payment_method}</span></td>
+                    </tr>
+                  `
+                      )
+                      .join("")}
+                </tbody>
+              </table>
+            </div>
+          `;
+                }
+            }
+
+            // Load low stock
+            const lowStock = await api.getLowStock(currentBusiness.id);
+            const lowStockDiv = document.getElementById("low-stock");
+            if (lowStockDiv) {
+                if (lowStock.length === 0) {
+                    lowStockDiv.innerHTML =
+                        '<p class="loading">Todos los productos tienen stock suficiente</p>';
+                } else {
+                    lowStockDiv.innerHTML = `
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${lowStock
+                      .map(
+                          (product: any) => `
+                    <tr>
+                      <td>${product.name}</td>
+                      <td><span class="badge badge-warning">${product.stock}</span></td>
+                    </tr>
+                  `
+                      )
+                      .join("")}
+                </tbody>
+              </table>
+            </div>
+          `;
+                }
+            }
+        } catch (error) {
+            console.error("Error loading dashboard:", error);
+        }
+    }
+
+    loadDashboard();
+</script>
