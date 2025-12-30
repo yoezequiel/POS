@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /pos
+Disallow: /products
+Disallow: /customers
+Disallow: /reports
+Disallow: /businesses
+
+# Sitemap (actualizar con la URL real en producción)
+# Sitemap: https://tu-dominio.com/sitemap.xml

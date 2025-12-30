@@ -1,9 +1,21 @@
 ---
 interface Props {
     title: string;
+    description?: string;
+    image?: string;
 }
 
-const { title } = Astro.props;
+const { title, description, image } = Astro.props;
+
+const defaultDescription =
+    "Sistema de Punto de Venta completo para gestión de ventas, productos, inventario y clientes.";
+const defaultImage = "/og-image.svg";
+
+const siteUrl = Astro.url.origin;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const ogImage = new URL(image || defaultImage, siteUrl).href;
+const ogDescription = description || defaultDescription;
+const pageTitle = `${title} - POS System`;
 ---
 
 <!doctype html>
@@ -11,7 +23,37 @@ const { title } = Astro.props;
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{title} - POS System</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="manifest" href="/manifest.json" />
+
+        <!-- Primary Meta Tags -->
+        <title>{pageTitle}</title>
+        <meta name="title" content={pageTitle} />
+        <meta name="description" content={ogDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:locale" content="es_ES" />
+        <meta property="og:site_name" content="POS System" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={pageTitle} />
+        <meta property="twitter:description" content={ogDescription} />
+        <meta property="twitter:image" content={ogImage} />
+
+        <!-- Additional Meta Tags -->
+        <meta name="robots" content="index, follow" />
+        <meta name="theme-color" content="#3b82f6" />
+
         <link rel="stylesheet" href="/src/styles/global.css" />
         <link rel="stylesheet" href="/src/styles/components.css" />
     </head>

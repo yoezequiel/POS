@@ -1,0 +1,58 @@
+---
+/**
+ * Componente SEO para meta tags personalizados
+ * Usar en cualquier página para sobrescribir los valores por defecto
+ */
+export interface SEOProps {
+    title?: string;
+    description?: string;
+    image?: string;
+    type?: "website" | "article";
+    noindex?: boolean;
+}
+
+const {
+    title,
+    description,
+    image,
+    type = "website",
+    noindex = false,
+} = Astro.props as SEOProps;
+
+const siteUrl = Astro.url.origin;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+
+// Valores por defecto
+const defaultTitle = "POS System";
+const defaultDescription =
+    "Sistema de Punto de Venta completo para gestión de ventas, productos, inventario y clientes.";
+const defaultImage = "/og-image.svg";
+
+const metaTitle = title || defaultTitle;
+const metaDescription = description || defaultDescription;
+const metaImage = new URL(image || defaultImage, siteUrl).href;
+const robots = noindex ? "noindex, nofollow" : "index, follow";
+---
+
+<!-- Primary Meta Tags -->
+<title>{metaTitle}</title>
+<meta name="title" content={metaTitle} />
+<meta name="description" content={metaDescription} />
+<link rel="canonical" href={canonicalUrl} />
+<meta name="robots" content={robots} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={metaTitle} />
+<meta property="og:description" content={metaDescription} />
+<meta property="og:image" content={metaImage} />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:site_name" content="POS System" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalUrl} />
+<meta property="twitter:title" content={metaTitle} />
+<meta property="twitter:description" content={metaDescription} />
+<meta property="twitter:image" content={metaImage} />
