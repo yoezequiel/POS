@@ -5,41 +5,66 @@ import AppLayout from "../layouts/AppLayout.astro";
 <AppLayout
     title="Productos"
     description="Gestiona el catálogo de productos: agrega, edita y controla precios, stock y categorías.">
-    <div class="products-page">
-        <div class="page-header flex items-center justify-between mb-4">
-            <h1 class="page-title">Productos</h1>
-            <button id="new-product-btn" class="btn btn-primary"
-                >+ Nuevo Producto</button
-            >
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-bold">Productos</h1>
+            <button
+                id="new-product-btn"
+                class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">
+                + Nuevo Producto
+            </button>
         </div>
 
-        <div class="card">
-            <div class="card-header">
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-6">
                 <input
                     type="text"
                     id="search-input"
-                    class="form-input"
+                    class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     placeholder="Buscar productos..."
-                    style="max-width: 300px;"
                 />
             </div>
-
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Nombre</th>
-                            <th>SKU</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Nombre</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >SKU</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Precio</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Stock</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Estado</th
+                            >
+                            <th scope="col" class="relative px-6 py-3">
+                                <span class="sr-only">Acciones</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody id="products-tbody">
+                    <tbody
+                        id="products-tbody"
+                        class="divide-y divide-gray-200 bg-white">
                         <tr>
-                            <td colspan="7" class="text-center">Cargando...</td>
+                            <td colspan="6" class="text-center py-4"
+                                >Cargando...</td
+                            >
                         </tr>
                     </tbody>
                 </table>
@@ -48,51 +73,93 @@ import AppLayout from "../layouts/AppLayout.astro";
     </div>
 
     <!-- Modal -->
-    <div id="product-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Nuevo Producto</h3>
-                <button class="btn-close-modal">&times;</button>
-            </div>
-            <form id="product-form">
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" id="name" class="form-input" required />
+    <div
+        id="product-modal"
+        class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-75 transition-opacity">
+        <div
+            class="flex min-h-screen items-center justify-center p-4 text-center">
+            <div
+                class="relative w-full max-w-lg transform rounded-lg bg-white p-6 text-left shadow-xl transition-all">
+                <div class="flex items-start justify-between">
+                    <h3
+                        id="modal-title"
+                        class="text-lg font-medium leading-6 text-gray-900">
+                        Nuevo Producto
+                    </h3>
+                    <button
+                        class="btn-close-modal rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        &times;
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">SKU</label>
-                    <input type="text" id="sku" class="form-input" />
-                </div>
-                <div class="grid grid-cols-2">
-                    <div class="form-group">
-                        <label class="form-label">Precio *</label>
+                <form id="product-form" class="mt-4 space-y-4">
+                    <div>
+                        <label
+                            for="name"
+                            class="block text-sm font-medium text-gray-700"
+                            >Nombre *</label
+                        >
                         <input
-                            type="number"
-                            id="price"
-                            class="form-input"
-                            step="0.01"
+                            type="text"
+                            id="name"
                             required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Stock Inicial</label>
+                    <div>
+                        <label
+                            for="sku"
+                            class="block text-sm font-medium text-gray-700"
+                            >SKU</label
+                        >
                         <input
-                            type="number"
-                            id="stock"
-                            class="form-input"
-                            value="0"
+                            type="text"
+                            id="sku"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary"
-                        >Guardar</button
-                    >
-                    <button type="button" class="btn btn-secondary modal-close"
-                        >Cancelar</button
-                    >
-                </div>
-            </form>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label
+                                for="price"
+                                class="block text-sm font-medium text-gray-700"
+                                >Precio *</label
+                            >
+                            <input
+                                type="number"
+                                id="price"
+                                step="0.01"
+                                required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                for="stock"
+                                class="block text-sm font-medium text-gray-700"
+                                >Stock Inicial</label
+                            >
+                            <input
+                                type="number"
+                                id="stock"
+                                value="0"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button
+                            type="button"
+                            class="modal-close rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </AppLayout>
@@ -188,17 +255,16 @@ import AppLayout from "../layouts/AppLayout.astro";
             .map(
                 (product) => `
       <tr>
-        <td>${product.name}</td>
-        <td>${product.sku || "-"}</td>
-        <td>${product.category_name || "-"}</td>
-        <td>$${product.price.toFixed(2)}</td>
-        <td>${product.stock}</td>
-        <td>
+        <td class="px-6 py-4 whitespace-nowrap">${product.name}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${product.sku || "-"}</td>
+        <td class="px-6 py-4 whitespace-nowrap">$${product.price.toFixed(2)}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${product.stock}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
           <span class="badge ${product.is_active ? "badge-success" : "badge-danger"}">
             ${product.is_active ? "Activo" : "Inactivo"}
           </span>
         </td>
-        <td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
           <button class="btn btn-sm btn-outline" data-action="edit" data-id="${product.id}">
             Editar
           </button>

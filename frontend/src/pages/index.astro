@@ -5,236 +5,97 @@ import AuthLayout from "../layouts/AuthLayout.astro";
 <AuthLayout
     title="Iniciar Sesión"
     description="Accede a tu cuenta del Sistema POS para gestionar ventas, productos e inventario.">
-    <div class="auth-form-container">
-        <h2 class="form-title">Iniciar Sesión</h2>
+    <div class="space-y-6">
+        <h2 class="text-center text-2xl font-bold text-gray-900">
+            Iniciar Sesión
+        </h2>
 
         <!-- Demo credentials banner -->
-        <div class="demo-banner">
-            <div class="demo-icon">🎯</div>
-            <div class="demo-content">
-                <strong>Credenciales de Demo</strong>
-                <div class="demo-credentials">
-                    <span
-                        class="credential-item tooltip"
-                        data-tooltip="Click para copiar">📧 demo@pos.com</span
-                    >
-                    <span
-                        class="credential-item tooltip"
-                        data-tooltip="Click para copiar">🔑 demo123</span
-                    >
+        <div class="rounded-md bg-blue-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl">🎯</span>
                 </div>
-                <p class="demo-note">
-                    ✨ Click en las credenciales para copiarlas
-                </p>
+                <div class="ml-3 flex-1 md:flex md:justify-between">
+                    <p class="text-sm text-blue-700">
+                        <strong class="font-bold">Credenciales de Demo:</strong>
+                        <span
+                            class="credential-item ml-2 cursor-pointer"
+                            data-tooltip="Click para copiar"
+                            >📧 demo@pos.com</span
+                        >
+                        <span
+                            class="credential-item ml-2 cursor-pointer"
+                            data-tooltip="Click para copiar">🔑 demo123</span
+                        >
+                    </p>
+                </div>
             </div>
         </div>
 
-        <form id="login-form">
-            <div class="form-group">
-                <label class="form-label" for="email">Correo electrónico</label>
-                <input
-                    type="email"
-                    id="email"
-                    class="form-input"
-                    required
-                    placeholder="tu@email.com"
-                    value="demo@pos.com"
-                />
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label
+                    for="email"
+                    class="block text-sm font-medium text-gray-700"
+                    >Correo electrónico</label
+                >
+                <div class="mt-1">
+                    <input
+                        type="email"
+                        id="email"
+                        required
+                        class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="tu@email.com"
+                        value="demo@pos.com"
+                    />
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label" for="password">Contraseña</label>
-                <input
-                    type="password"
-                    id="password"
-                    class="form-input"
-                    required
-                    placeholder="••••••••"
-                    value="demo123"
-                />
+
+            <div>
+                <label
+                    for="password"
+                    class="block text-sm font-medium text-gray-700"
+                    >Contraseña</label
+                >
+                <div class="mt-1">
+                    <input
+                        type="password"
+                        id="password"
+                        required
+                        class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="••••••••"
+                        value="demo123"
+                    />
+                </div>
             </div>
-            <div id="error-message" class="form-error" style="display: none;">
+
+            <div class="flex items-center justify-between">
+                <div class="text-sm">
+                    <a
+                        href="/register"
+                        class="font-medium text-indigo-600 hover:text-indigo-500"
+                        >¿No tienes cuenta? Regístrate</a
+                    >
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">
-                Ingresar
-            </button>
+
+            <div
+                id="error-message"
+                class="hidden rounded-md bg-red-50 p-4 text-sm text-red-700">
+            </div>
+
+            <div>
+                <button
+                    type="submit"
+                    class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <span class="btn-text">Iniciar Sesión</span>
+                    <div class="spinner hidden"></div>
+                </button>
+            </div>
         </form>
-        <p class="auth-footer">
-            ¿No tienes cuenta? <a href="/register">Regístrate</a>
-        </p>
     </div>
 </AuthLayout>
-
-<style>
-    .form-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 2rem;
-        text-align: center;
-        background: linear-gradient(
-            135deg,
-            var(--primary-color) 0%,
-            var(--primary-dark) 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -0.02em;
-    }
-
-    .demo-banner {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        color: white;
-        display: flex;
-        align-items: flex-start;
-        gap: 1.25rem;
-        box-shadow: var(--shadow-xl);
-        animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .demo-banner::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            transparent 100%
-        );
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .demo-icon {
-        font-size: 2.5rem;
-        line-height: 1;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-    }
-
-    .demo-content {
-        flex: 1;
-        position: relative;
-    }
-
-    .demo-content strong {
-        display: block;
-        font-size: 1.125rem;
-        margin-bottom: 0.75rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-    }
-
-    .demo-credentials {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-        font-family:
-            "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Droid Sans Mono",
-            monospace;
-        font-size: 0.9375rem;
-    }
-
-    .demo-credentials .credential-item {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 0.875rem;
-        border-radius: var(--radius);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        transition: var(--transition-slow);
-        cursor: pointer;
-        position: relative;
-    }
-
-    .demo-credentials .credential-item:hover {
-        background: rgba(255, 255, 255, 0.35);
-        transform: translateY(-2px) scale(1.05);
-        border-color: rgba(255, 255, 255, 0.5);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .demo-credentials .credential-item:active {
-        transform: translateY(0) scale(0.98);
-    }
-
-    .demo-credentials .credential-item.copied {
-        animation: copyPulse 0.6s ease;
-    }
-
-    @keyframes copyPulse {
-        0%,
-        100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.5);
-        }
-    }
-
-    .demo-note {
-        font-size: 0.875rem;
-        opacity: 0.95;
-        margin: 0;
-        line-height: 1.5;
-    }
-
-    .auth-footer {
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.9375rem;
-        color: var(--text-secondary);
-    }
-
-    .auth-footer a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 600;
-        transition: var(--transition);
-    }
-
-    .auth-footer a:hover {
-        color: var(--primary-dark);
-        text-decoration: none;
-    }
-
-    @media (max-width: 640px) {
-        .demo-banner {
-            flex-direction: column;
-            text-align: center;
-            padding: 1.25rem;
-        }
-
-        .demo-icon {
-            margin: 0 auto;
-        }
-
-        .demo-credentials {
-            justify-content: center;
-        }
-
-        .form-title {
-            font-size: 1.75rem;
-        }
-    }
-</style>
 
 <script>
     import { api } from "../lib/api";

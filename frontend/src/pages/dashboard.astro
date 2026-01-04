@@ -5,109 +5,35 @@ import AppLayout from "../layouts/AppLayout.astro";
 <AppLayout
     title="Dashboard"
     description="Panel de control del Sistema POS: estadísticas de ventas, productos más vendidos y actividad reciente.">
-    <div class="dashboard">
-        <h1 class="page-title">Dashboard</h1>
-
-        <div id="stats-grid" class="grid grid-cols-4 mb-4">
+    <div class="space-y-8">
+        <!-- Stats Grid -->
+        <div
+            id="stats-grid"
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Stats will be loaded here -->
         </div>
 
-        <div class="grid grid-cols-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Ventas Recientes</h3>
+        <!-- Recent Sales and Low Stock -->
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div class="lg:col-span-2">
+                <div class="rounded-lg bg-white p-6 shadow">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Ventas Recientes
+                    </h3>
+                    <div id="recent-sales" class="mt-4"></div>
                 </div>
-                <div id="recent-sales"></div>
             </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Productos con Bajo Stock</h3>
+            <div>
+                <div class="rounded-lg bg-white p-6 shadow">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Productos con Bajo Stock
+                    </h3>
+                    <div id="low-stock" class="mt-4"></div>
                 </div>
-                <div id="low-stock"></div>
             </div>
         </div>
     </div>
 </AppLayout>
-
-<style>
-    .page-title {
-        font-size: 2.25rem;
-        font-weight: 800;
-        margin-bottom: 2.5rem;
-        color: var(--text-color);
-        letter-spacing: -0.02em;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 2rem;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        border: 2px solid var(--border-light);
-        transition: var(--transition-slow);
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-    }
-
-    .stat-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 5px;
-        height: 100%;
-        background: linear-gradient(
-            to bottom,
-            var(--primary-color),
-            var(--primary-dark)
-        );
-        opacity: 0;
-        transition: var(--transition-slow);
-    }
-
-    .stat-card:hover {
-        box-shadow:
-            var(--shadow-xl),
-            0 0 30px rgba(99, 102, 241, 0.15);
-        transform: translateY(-6px) scale(1.02);
-        border-color: var(--primary-light);
-    }
-
-    .stat-card:hover::before {
-        opacity: 1;
-        width: 5px;
-    }
-
-    .stat-card:active {
-        transform: translateY(-2px) scale(1);
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        margin-bottom: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--text-color);
-        line-height: 1;
-        letter-spacing: -0.02em;
-    }
-
-    .loading {
-        text-align: center;
-        padding: 3rem;
-        color: var(--text-light);
-        font-size: 0.9375rem;
-    }
-</style>
 
 <script>
     import { api } from "../lib/api";
@@ -127,23 +53,23 @@ import AppLayout from "../layouts/AppLayout.astro";
             const statsGrid = document.getElementById("stats-grid");
             if (statsGrid) {
                 statsGrid.innerHTML = `
-          <div class="stat-card">
-            <div class="stat-label">Ventas Hoy</div>
-            <div class="stat-value">${stats.today.sales_count}</div>
-            <div class="stat-label">$${stats.today.total.toFixed(2)}</div>
+          <div class="stat-card rounded-lg bg-white p-6 shadow">
+            <div class="stat-label text-sm font-semibold text-gray-500">Ventas Hoy</div>
+            <div class="stat-value text-3xl font-bold text-gray-900">${stats.today.sales_count}</div>
+            <div class="stat-label text-sm font-semibold text-gray-500">$${stats.today.total.toFixed(2)}</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Ventas del Mes</div>
-            <div class="stat-value">${stats.month.sales_count}</div>
-            <div class="stat-label">$${stats.month.total.toFixed(2)}</div>
+          <div class="stat-card rounded-lg bg-white p-6 shadow">
+            <div class="stat-label text-sm font-semibold text-gray-500">Ventas del Mes</div>
+            <div class="stat-value text-3xl font-bold text-gray-900">${stats.month.sales_count}</div>
+            <div class="stat-label text-sm font-semibold text-gray-500">$${stats.month.total.toFixed(2)}</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Productos Activos</div>
-            <div class="stat-value">${stats.active_products_count}</div>
+          <div class="stat-card rounded-lg bg-white p-6 shadow">
+            <div class="stat-label text-sm font-semibold text-gray-500">Productos Activos</div>
+            <div class="stat-value text-3xl font-bold text-gray-900">${stats.active_products_count}</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Stock Bajo</div>
-            <div class="stat-value">${stats.low_stock_count}</div>
+          <div class="stat-card rounded-lg bg-white p-6 shadow">
+            <div class="stat-label text-sm font-semibold text-gray-500">Stock Bajo</div>
+            <div class="stat-value text-3xl font-bold text-gray-900">${stats.low_stock_count}</div>
           </div>
         `;
             }
@@ -158,22 +84,22 @@ import AppLayout from "../layouts/AppLayout.astro";
                 } else {
                     recentSalesDiv.innerHTML = `
             <div class="table-container">
-              <table class="table">
+              <table class="table w-full">
                 <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Método</th>
+                  <tr class="bg-gray-100 text-gray-700">
+                    <th class="py-2 text-left text-sm font-medium">Fecha</th>
+                    <th class="py-2 text-left text-sm font-medium">Total</th>
+                    <th class="py-2 text-left text-sm font-medium">Método</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                   ${sales
                       .map(
                           (sale: any) => `
-                    <tr>
-                      <td>${new Date(sale.created_at).toLocaleDateString()}</td>
-                      <td>$${sale.total.toFixed(2)}</td>
-                      <td><span class="badge badge-info">${sale.payment_method}</span></td>
+                    <tr class="hover:bg-gray-50">
+                      <td class="py-3 text-sm">${new Date(sale.created_at).toLocaleDateString()}</td>
+                      <td class="py-3 text-sm">$${sale.total.toFixed(2)}</td>
+                      <td class="py-3 text-sm"><span class="badge badge-info">${sale.payment_method}</span></td>
                     </tr>
                   `
                       )
@@ -195,20 +121,20 @@ import AppLayout from "../layouts/AppLayout.astro";
                 } else {
                     lowStockDiv.innerHTML = `
             <div class="table-container">
-              <table class="table">
+              <table class="table w-full">
                 <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Stock</th>
+                  <tr class="bg-gray-100 text-gray-700">
+                    <th class="py-2 text-left text-sm font-medium">Producto</th>
+                    <th class="py-2 text-left text-sm font-medium">Stock</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                   ${lowStock
                       .map(
                           (product: any) => `
-                    <tr>
-                      <td>${product.name}</td>
-                      <td><span class="badge badge-warning">${product.stock}</span></td>
+                    <tr class="hover:bg-gray-50">
+                      <td class="py-3 text-sm">${product.name}</td>
+                      <td class="py-3 text-sm"><span class="badge badge-warning">${product.stock}</span></td>
                     </tr>
                   `
                       )
@@ -226,3 +152,12 @@ import AppLayout from "../layouts/AppLayout.astro";
 
     loadDashboard();
 </script>
+
+<style>
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+        font-size: 0.9375rem;
+    }
+</style>

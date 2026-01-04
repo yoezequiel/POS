@@ -5,48 +5,56 @@ import AppLayout from "../layouts/AppLayout.astro";
 <AppLayout
     title="Reportes"
     description="Visualiza reportes y estadísticas de ventas, productos más vendidos e ingresos del negocio.">
-    <div class="reports-page">
-        <h1 class="page-title">Reportes</h1>
+    <div class="space-y-8">
+        <h1 class="text-3xl font-bold">Reportes</h1>
 
-        <div class="grid grid-cols-2 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Ventas por Método de Pago</h3>
-                </div>
-                <div id="payment-methods-chart"></div>
+        <!-- Top Cards -->
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div class="rounded-lg bg-white p-6 shadow">
+                <h3 class="text-lg font-medium text-gray-900">
+                    Ventas por Método de Pago
+                </h3>
+                <div id="payment-methods-chart" class="mt-4 space-y-4"></div>
             </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Productos Más Vendidos</h3>
-                </div>
-                <div id="top-products-list"></div>
+            <div class="rounded-lg bg-white p-6 shadow">
+                <h3 class="text-lg font-medium text-gray-900">
+                    Productos Más Vendidos
+                </h3>
+                <div id="top-products-list" class="mt-4 space-y-3"></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Historial de Ventas</h3>
-                <div class="flex gap-2">
-                    <input type="date" id="start-date" class="form-input" />
-                    <input type="date" id="end-date" class="form-input" />
-                    <button id="filter-btn" class="btn btn-primary"
+        <!-- Sales History -->
+        <div class="rounded-lg bg-white shadow">
+            <div
+                class="space-y-4 p-6 md:flex md:items-center md:justify-between md:space-y-0">
+                <h3 class="text-lg font-medium text-gray-900">
+                    Historial de Ventas
+                </h3>
+                <div class="flex flex-col gap-4 md:flex-row md:items-center">
+                    <input
+                        type="date"
+                        id="start-date"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                    <input
+                        type="date"
+                        id="end-date"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                    <button
+                        id="filter-btn"
+                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                         >Filtrar</button
                     >
                 </div>
             </div>
-            <div id="sales-history"></div>
+            <div id="sales-history" class="overflow-x-auto"></div>
         </div>
     </div>
 </AppLayout>
 
 <style>
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 2rem;
-    }
-
     .product-item {
         display: flex;
         justify-content: space-between;

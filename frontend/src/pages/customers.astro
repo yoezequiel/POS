@@ -5,37 +5,57 @@ import AppLayout from "../layouts/AppLayout.astro";
 <AppLayout
     title="Clientes"
     description="Administra tu base de clientes: registra información, historial de compras y datos de contacto.">
-    <div class="customers-page">
-        <div class="page-header flex items-center justify-between mb-4">
-            <h1 class="page-title">Clientes</h1>
-            <button id="new-customer-btn" class="btn btn-primary"
-                >+ Nuevo Cliente</button
-            >
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-bold">Clientes</h1>
+            <button
+                id="new-customer-btn"
+                class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">
+                + Nuevo Cliente
+            </button>
         </div>
 
-        <div class="card">
-            <div class="card-header">
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-6">
                 <input
                     type="text"
                     id="search-input"
-                    class="form-input"
+                    class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     placeholder="Buscar clientes..."
-                    style="max-width: 300px;"
                 />
             </div>
-
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Nombre</th>
-                            <th>Documento</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Acciones</th>
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Nombre</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Documento</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Email</th
+                            >
+                            <th
+                                scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                                >Teléfono</th
+                            >
+                            <th scope="col" class="relative px-6 py-3">
+                                <span class="sr-only">Acciones</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody id="customers-tbody">
+                    <tbody
+                        id="customers-tbody"
+                        class="divide-y divide-gray-200 bg-white">
                         <tr>
                             <td colspan="5" class="text-center">Cargando...</td>
                         </tr>
@@ -46,81 +66,91 @@ import AppLayout from "../layouts/AppLayout.astro";
     </div>
 
     <!-- Modal -->
-    <div id="customer-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Nuevo Cliente</h3>
-                <button class="modal-close">&times;</button>
+    <div
+        id="customer-modal"
+        class="fixed inset-0 z-10 hidden overflow-y-auto bg-gray-500 bg-opacity-75 transition-opacity">
+        <div
+            class="flex min-h-screen items-center justify-center p-4 text-center">
+            <div
+                class="relative w-full max-w-lg transform rounded-lg bg-white p-6 text-left shadow-xl transition-all">
+                <div class="flex items-start justify-between">
+                    <h3
+                        id="modal-title"
+                        class="text-lg font-medium leading-6 text-gray-900">
+                        Nuevo Cliente
+                    </h3>
+                    <button
+                        class="modal-close rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        &times;
+                    </button>
+                </div>
+                <form id="customer-form" class="mt-4 space-y-4">
+                    <div>
+                        <label
+                            for="name"
+                            class="block text-sm font-medium text-gray-700"
+                            >Nombre *</label
+                        >
+                        <input
+                            type="text"
+                            id="name"
+                            required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="document"
+                            class="block text-sm font-medium text-gray-700"
+                            >Documento</label
+                        >
+                        <input
+                            type="text"
+                            id="document"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="email"
+                            class="block text-sm font-medium text-gray-700"
+                            >Email</label
+                        >
+                        <input
+                            type="email"
+                            id="email"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="phone"
+                            class="block text-sm font-medium text-gray-700"
+                            >Teléfono</label
+                        >
+                        <input
+                            type="tel"
+                            id="phone"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button
+                            type="button"
+                            class="modal-close rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form id="customer-form">
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" id="name" class="form-input" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Documento</label>
-                    <input type="text" id="document" class="form-input" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="email" class="form-input" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Teléfono</label>
-                    <input type="tel" id="phone" class="form-input" />
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary"
-                        >Guardar</button
-                    >
-                    <button type="button" class="btn btn-outline modal-close"
-                        >Cancelar</button
-                    >
-                </div>
-            </form>
         </div>
     </div>
 </AppLayout>
-
-<style>
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 0.5rem;
-        padding: 2rem;
-        max-width: 500px;
-        width: 90%;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: var(--text-light);
-    }
-</style>
 
 <script>
     import { api } from "../lib/api";
@@ -159,11 +189,11 @@ import AppLayout from "../layouts/AppLayout.astro";
             .map(
                 (customer) => `
       <tr>
-        <td>${customer.name}</td>
-        <td>${customer.document || "-"}</td>
-        <td>${customer.email || "-"}</td>
-        <td>${customer.phone || "-"}</td>
-        <td>
+        <td class="px-6 py-4 whitespace-nowrap">${customer.name}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${customer.document || "-"}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${customer.email || "-"}</td>
+        <td class="px-6 py-4 whitespace-nowrap">${customer.phone || "-"}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
           <button class="btn btn-sm btn-outline" data-action="edit" data-id="${customer.id}">
             Editar
           </button>
